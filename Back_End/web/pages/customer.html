@@ -100,7 +100,7 @@
         let formData=$("#customerForm").serialize();
         console.log(formData)
         $.ajax({
-            url: "http://localhost:8080/jsp/pages/customer",
+            url: "customer",
             method:"post",
             data:formData,
             success:function (res){
@@ -120,7 +120,7 @@
     $("#btnCusDelete").click(function () {
         let id = $("#txtCustomerID").val();
         $.ajax({
-            url: "http://localhost:8080/jsp/pages/customer?id=" + id,
+            url: "customer?id=" + id,
             method: 'delete',
             success: function (res) {
                 getAllCustomers();
@@ -147,7 +147,7 @@
             address:cusAddress
         }
         $.ajax({
-            url:"http://localhost:8080/jsp/pages/customer",
+            url:"customer",
             method:"put",
             data:JSON.stringify(customerDB),
             contentType:"application/json",
@@ -168,7 +168,7 @@
     function getAllCustomers() {
         $("#tblCustomer").empty();
         $.ajax({
-            url : "http://localhost:8080/jsp/pages/customer",
+            url : "customer",
             success : function (customer) {
                 console.log(customer);
                 for (let i in customer) {
