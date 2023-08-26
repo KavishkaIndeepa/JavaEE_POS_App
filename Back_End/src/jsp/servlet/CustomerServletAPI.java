@@ -18,7 +18,7 @@ import java.sql.*;
 //http:://localhost:8080/pos_one/pages/customer
 
 @WebServlet(urlPatterns = {"/pages/customer"})
-public class CustomerServlet extends HttpServlet {
+public class CustomerServletAPI extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

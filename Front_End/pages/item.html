@@ -95,7 +95,7 @@
     function getAllItems() {
         $("#tblItem").empty();
         $.ajax({
-            url : "item",
+            url : "http://localhost:8080/jsp/pages/item",
             success : function (item) {
                 console.log(item);
                 for (let i in item) {
@@ -123,7 +123,7 @@
         let formData=$("#itemForm").serialize();
         console.log(formData)
         $.ajax({
-            url: "item",
+            url: "http://localhost:8080/jsp/pages/item",
             method:"post",
             data:formData,
             success:function (res){
@@ -145,7 +145,7 @@
         let code=$("#itemCode").val();
         console.log(code)
         $.ajax({
-            url:"item?code="+code,
+            url:"http://localhost:8080/jsp/pages/item?code="+code,
             method:"delete",
             success:function (res){
                 getAllItems()
@@ -173,7 +173,7 @@
             unitPrice:itemPrice
         }
         $.ajax({
-            url:"item",
+            url:"http://localhost:8080/jsp/pages/item",
             method:"put",
             data:JSON.stringify(itemDB),
             contentType:"application/json",

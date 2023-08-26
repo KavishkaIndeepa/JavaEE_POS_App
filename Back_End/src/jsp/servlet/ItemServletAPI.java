@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.sql.*;
 
 @WebServlet(urlPatterns = "/pages/item")
-public class ItemServlet extends HttpServlet {
+public class ItemServletAPI extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -102,20 +102,13 @@ public class ItemServlet extends HttpServlet {
         JsonObject itemObject = reader.readObject();
 
 
-//        String code = req.getParameter("code");
-//        String itemName = req.getParameter("description");
-//        String qty = req.getParameter("qty");
-//        String unitPrice = req.getParameter("unitPrice");
-
-
         String code = itemObject.getString("code");
         String itemName = itemObject.getString("description");
-        String qty = itemObject.getString("qty");
-        String unitPrice = itemObject.getString("unitPrice");
+        int qty = Integer.parseInt(itemObject.getString("qty"));
+        double unitPrice = Double.parseDouble(itemObject.getString("unitPrice"));
 
         resp.addHeader("Content-Type","application/json");
         resp.addHeader("Access-Control-Allow-Origin","*");
-//
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
