@@ -80,12 +80,12 @@
                                             <input class="form-control" id="orderCustomerName" type="text">
                                         </div>
                                     </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label>Salary :</label>
-                                            <input class="form-control" id="orderCustomerSalary" type="text">
-                                        </div>
-                                    </div>
+<!--                                    <div class="col-6">-->
+<!--                                        <div class="form-group">-->
+<!--                                            <label>Salary :</label>-->
+<!--                                            <input class="form-control" id="orderCustomerSalary" type="text">-->
+<!--                                        </div>-->
+<!--                                    </div>-->
                                     <div class="col-12">
                                         <div class="form-group">
                                             <label>Address :</label>
@@ -230,6 +230,110 @@
 
 
 <script src="../assets/js/jquery-3.7.0.min.js"></script>
+<script>
+    let cartItems;
+    let subTotal=0;
+    let discount=0;
+    let finalTotal=0;
 
+    // genarateOrderID
+    var genarateOrderID = 0;
+
+    $("#txtOrderID").val('0-00' + (genarateOrderID += 1));
+
+    // loardCustomerId
+
+    function loadCustomerIds() {
+        $("#selectCusID").empty();
+        $("#selectCusID").append($("<option></option>").attr("value", 0).text("Select ID"));
+
+        var countCustomerId = 1;
+
+        $.ajax({
+            url: "http://localhost:8080/jsp/pages/customer",
+            method: "GET",
+            dataType: "json",
+            success: function (resp) {
+                for (let ids of resp) {
+                    $("#selectCusID").append($("<option></option>").attr("value", countCustomerId).text(ids.id));
+                    countCustomerId++;
+                    console.log(countCustomerId);
+                }
+
+                // Bind the event after options are loaded
+                $("#selectCusID").click(function () {
+                    loadCustomer();
+                });
+            }
+        });
+    }
+
+    function loadCustomer() {
+        $.ajax({
+            url: "http://localhost:8080/jsp/pages/customer?option=id=" + $("#selectCusID option:selected").text(),
+            method: "GET",
+            dataType: "json",
+            success: function (response) {
+                $("#orderCustomerID").val(response.id);
+                $("#orderCustomerName").val(response.name);
+                $("#orderCustomerAddress").val(response.address);
+            },
+            error: function (ob, statusText, error) {
+            }
+        });
+    }
+
+    loadCustomerIds();
+
+
+
+    // loadCustomerIds
+
+    function loadItemIDS() {
+        $("#selectItemCode").empty();
+        $("#selectItemCode").append($("<option></option>").attr("value", 0).text("Select code"));
+
+        var countItemCode =1;
+
+        $.ajax({
+            url: "http://localhost:8080/jsp/pages/item",
+            method: "GET",
+            dataType: "json",
+            success: function (resp) {
+                for (let cods of resp) {
+                    $("#selectItemCode").append($("<option></option>").attr("value", countItemCode).text(cods.code));
+                    countItemCode++;
+                    console.log(countItemCode);
+                }
+
+                // Bind the event after options are loaded
+                $("#selectItemCode").click(function () {
+                    loadItem();
+                });
+            }
+        });
+
+    }
+
+    function loadItem() {
+        $.ajax({
+            url: "http://localhost:8080/jsp/pages/item?option=code=" + $("#selectItemCode option:selected").text(),
+            method: "GET",
+            dataType: "json",
+            success: function (response) {
+                $("#orderItemCode").val(response.code);
+                $("#orderItemDescription").val(response.description);
+                $("#orderItemPrice").val(response.unitPrice);
+                $("#orderQTYOnHand").val(response.qtyOnHand);
+            },
+            error: function (ob, statusText, error) {
+            }
+        });
+    }
+
+    loadItemIDS();
+
+
+</script>
 </body>
 </html>
