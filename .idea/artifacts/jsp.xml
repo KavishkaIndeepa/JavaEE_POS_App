@@ -13,7 +13,6 @@
           <element id="library" level="project" name="mysql-connector-java-8.0.24" />
         </element>
       </element>
-      <element id="javaee-facet-resources" facet="Back_End/web/Web" />
     </root>
   </artifact>
 </component>

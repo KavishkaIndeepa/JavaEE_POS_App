@@ -241,99 +241,119 @@
 
     $("#txtOrderID").val('0-00' + (genarateOrderID += 1));
 
-    // loardCustomerId
 
-    function loadCustomerIds() {
-        $("#selectCusID").empty();
-        $("#selectCusID").append($("<option></option>").attr("value", 0).text("Select ID"));
+    //--------------------------
+    $(document).ready(function() {
+        loadItemCode();
+        loadCusCode();
 
-        var countCustomerId = 1;
-
-        $.ajax({
-            url: "http://localhost:8080/jsp/pages/customer",
-            method: "GET",
-            dataType: "json",
-            success: function (resp) {
-                for (let ids of resp) {
-                    $("#selectCusID").append($("<option></option>").attr("value", countCustomerId).text(ids.id));
-                    countCustomerId++;
-                    console.log(countCustomerId);
-                }
-
-                // Bind the event after options are loaded
-                $("#selectCusID").click(function () {
-                    loadCustomer();
-                });
+        $("#selectItemCode").change(function() {
+            var selectedCode = $(this).val();
+            if (selectedCode) {
+                fetchItemDetails(selectedCode);
             }
         });
-    }
-
-    function loadCustomer() {
-        $.ajax({
-            url: "http://localhost:8080/jsp/pages/customer?option=id=" + $("#selectCusID option:selected").text(),
-            method: "GET",
-            dataType: "json",
-            success: function (response) {
-                $("#orderCustomerID").val(response.id);
-                $("#orderCustomerName").val(response.name);
-                $("#orderCustomerAddress").val(response.address);
-            },
-            error: function (ob, statusText, error) {
+        $("#selectCusID").change(function() {
+            var selectedId = $(this).val();
+            if (selectedId) {
+                fetchCusDetails(selectedId);
             }
         });
-    }
+    });
 
-    loadCustomerIds();
+    // loadItem
 
-
-
-    // loadCustomerIds
-
-    function loadItemIDS() {
+    function loadItemCode() {
         $("#selectItemCode").empty();
-        $("#selectItemCode").append($("<option></option>").attr("value", 0).text("Select code"));
-
-        var countItemCode =1;
-
+        let code = $("#selectItemCode").val();
         $.ajax({
-            url: "http://localhost:8080/jsp/pages/item",
-            method: "GET",
-            dataType: "json",
-            success: function (resp) {
-                for (let cods of resp) {
-                    $("#selectItemCode").append($("<option></option>").attr("value", countItemCode).text(cods.code));
-                    countItemCode++;
-                    console.log(countItemCode);
+            url: 'http://localhost:8080/jsp/pages/item?code'+ code,
+            success: function (res) {
+                console.log(res);
+                for (let item of res) {
+                    console.log(item.code);
+                    let id = `<option>${item.code}</option>`;
+                    $("#selectItemCode").append(id);
                 }
-
-                // Bind the event after options are loaded
-                $("#selectItemCode").click(function () {
-                    loadItem();
-                });
-            }
-        });
-
-    }
-
-    function loadItem() {
-        $.ajax({
-            url: "http://localhost:8080/jsp/pages/item?option=code=" + $("#selectItemCode option:selected").text(),
-            method: "GET",
-            dataType: "json",
-            success: function (response) {
-                $("#orderItemCode").val(response.code);
-                $("#orderItemDescription").val(response.description);
-                $("#orderItemPrice").val(response.unitPrice);
-                $("#orderQTYOnHand").val(response.qtyOnHand);
             },
-            error: function (ob, statusText, error) {
+            error: function (error) {
+                alert(JSON.parse(error.responseText).message);
             }
         });
     }
 
-    loadItemIDS();
+    function fetchItemDetails(itemCode) {
+        $.ajax({
+            url: 'http://localhost:8080/jsp/pages/item',
+            data: { code: itemCode },
+            success: function(res) {
+                if (res.length > 0) {
+                    var item = res[0];
+                    $("#txtItemCode").val(item.code);
+                    $("#txtItemDescription").val(item.description);
+                    $("#txtItemPrice").val(item.unitPrice);
+                    $("#txtQTYOnHand").val(item.qtyOnHand);
+                }
+            },
+            error: function(error) {
+                console.error(error);
+            }
+        });
+    }
+
+    // loadItem
+    function loadCusCode() {
+        $("#selectCusID").empty();
+        let id = $("#selectCusID").val();
+        $.ajax({
+            url: 'http://localhost:8080/jsp/pages/customer?id'+id,
+            success: function (res) {
+                console.log(res);
+                for (let cus of res) {
+                    console.log(cus.id);
+                    let id = `<option>${cus.id}</option>`;
+                    $("#selectCusID").append(id);
+                }
+            },
+            error: function (error) {
+                alert(JSON.parse(error.responseText).message);
+            }
+        });
+    }
+
+    function fetchCusDetails(selectedId) {
+        $.ajax({
+            url: 'http://localhost:8080/jsp/pages/customer?option=search',
+            data:  { id: selectedId },
+            success: function(res) {
+                if (res.length > 0) {
+                    var cus = res[0];
+                    $("#orderCustomerID").val(cus.id);
+                    $("#orderCustomerName").val(cus.name);
+                    $("#orderCustomerAddress").val(cus.address);
+                }
+            },
+            error: function(error) {
+                console.error(error);
+            }
+        });
+    }
 
 
+    // date
+    const currentDate = new Date();
+
+    // Format the current date as yyyy-MM-dd
+    const formattedDate = formatDate(currentDate);
+
+    $('#txtDate').val(formattedDate);
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 </script>
 </body>
 </html>
