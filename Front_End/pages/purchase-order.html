@@ -37,7 +37,7 @@
                     <div class="card">
                         <div class="card-header bg-primary font-weight-bolder">Invoice Details</div>
                         <div class="card-body">
-                            <form>
+                            <form id="formData">
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="form-group">
@@ -231,10 +231,6 @@
 
 <script src="../assets/js/jquery-3.7.0.min.js"></script>
 <script>
-    let cartItems;
-    let subTotal=0;
-    let discount=0;
-    let finalTotal=0;
 
     // genarateOrderID
     var genarateOrderID = 0;
@@ -246,6 +242,7 @@
     $(document).ready(function() {
         loadItemCode();
         loadCusCode();
+
 
         $("#selectItemCode").change(function() {
             var selectedCode = $(this).val();
@@ -286,13 +283,17 @@
         $.ajax({
             url: 'http://localhost:8080/jsp/pages/item',
             data: { code: itemCode },
+            dataType: "json",
             success: function(res) {
                 if (res.length > 0) {
-                    var item = res[0];
-                    $("#txtItemCode").val(item.code);
-                    $("#txtItemDescription").val(item.description);
-                    $("#txtItemPrice").val(item.unitPrice);
-                    $("#txtQTYOnHand").val(item.qtyOnHand);
+                    for (let i in res) {
+                        var item = res[i];
+                        $("#txtItemCode").val(item.code);
+                        $("#txtItemDescription").val(item.description);
+                        $("#txtItemPrice").val(item.unitPrice);
+                        $("#txtQTYOnHand").val(item.qtyOnHand);
+                    }
+
                 }
             },
             error: function(error) {
@@ -307,6 +308,7 @@
         let id = $("#selectCusID").val();
         $.ajax({
             url: 'http://localhost:8080/jsp/pages/customer?id'+id,
+            method: 'GET',
             success: function (res) {
                 console.log(res);
                 for (let cus of res) {
@@ -323,14 +325,18 @@
 
     function fetchCusDetails(selectedId) {
         $.ajax({
-            url: 'http://localhost:8080/jsp/pages/customer?option=search',
+            url: 'http://localhost:8080/jsp/pages/customer',
             data:  { id: selectedId },
+            dataType: "json",
             success: function(res) {
                 if (res.length > 0) {
-                    var cus = res[0];
-                    $("#orderCustomerID").val(cus.id);
-                    $("#orderCustomerName").val(cus.name);
-                    $("#orderCustomerAddress").val(cus.address);
+                    for (let i in res) {
+                        var cus = res[i];
+                        $("#orderCustomerID").val(cus.id);
+                        $("#orderCustomerName").val(cus.name);
+                        $("#orderCustomerAddress").val(cus.address);
+                    }
+
                 }
             },
             error: function(error) {
@@ -354,6 +360,108 @@
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+
+    let orderItems= [];
+
+    $("#btnAddToTable").click(function() {
+        let itemCode = $("#txtItemCode").val();
+        let itemName = $("#txtItemDescription").val();
+        let price = parseFloat($("#txtItemPrice").val());
+        let quantity = parseInt($("#txtQty").val());
+
+        let total = price * quantity;
+
+        orderItems.push({
+            code: itemCode,
+            description: itemName,
+            unitPrice: price,
+            quantity: quantity,
+            total: total
+        });
+
+        $("#orderCustomerID").val("");
+        $("#orderCustomerName").val("");
+        $("#orderCustomerAddress").val("");
+        $("#txtItemCode").val("");
+        $("#txtItemDescription").val("");
+        $("#txtItemPrice").val("");
+        $("#txtQTYOnHand").val("");
+        $("#txtQty").val("");
+
+        updateOrderTable();
+
+        updateTotals();
+    });
+
+
+    function updateOrderTable() {
+        let tableBody = $("#orderTable");
+        tableBody.empty();
+
+        for (let item of orderItems) {
+            let row = `<tr>
+            <td>${item.code}</td>
+            <td>${item.description}</td>
+            <td>${item.unitPrice}</td>
+            <td>${item.quantity}</td>
+            <td>${item.total}</td>
+        </tr>`;
+            tableBody.append(row);
+        }
+    }
+
+    function updateTotals() {
+        let totalAmount = 0;
+
+        for (let item of orderItems) {
+            totalAmount += item.total;
+        }
+
+        let subtotalAmount = totalAmount;
+        let cashAmount = parseFloat($("#txtCash").val()) || 0;
+        let discountAmount = parseFloat($("#txtDiscount").val()) || 0;
+
+        let balanceAmount = cashAmount - discountAmount - subtotalAmount;
+
+        $("#total").text(totalAmount.toFixed(2));
+        $("#subtotal").text(subtotalAmount.toFixed(2));
+        $("#txtBalance").val(balanceAmount.toFixed(2));
+    }
+
+    $("#btnSubmitOrder").click(function () {
+        let formData = $("#formData").serialize();
+        $.ajax({
+            url:"http://localhost:8080/jsp/pages/purchaseOrder",
+            method: "post",
+            data: formData,
+            dataType:"json",
+            success: function (res) {
+                alert(res.message);
+            },
+            error: function (error) {
+                alert(JSON.parse(error.responseText).message);
+            }
+        });
+    });
+
+    let disTOGave = 0;
+
+    $('#txtDiscount').on('keyup', function() {
+        let dis = parseFloat($('#txtDiscount').val());
+        let tot = parseFloat($('#txtBalance').val());
+
+        console.log(dis + "==" + tot);
+
+        let totMin = tot * (dis / 100);
+        console.log("Discount Amount: " + totMin);
+
+        let subTot = tot - totMin;
+        disTOGave = totMin;
+
+        $('#subtotal').val(subTot);
+        updateTotals();
+    });
+
 </script>
 </body>
 </html>

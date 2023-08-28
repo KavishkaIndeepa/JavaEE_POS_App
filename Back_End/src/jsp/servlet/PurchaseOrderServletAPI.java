@@ -19,7 +19,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/javaee_pos_app", "root", "12345678");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from orders");
 //            PreparedStatement pstm2 = connection.prepareStatement("select * from order_detail");
             ResultSet rst = pstm.executeQuery();
@@ -76,7 +76,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
         try {
             forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/test3", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             connection.setAutoCommit(false);
 
             PreparedStatement orderStatement = connection.prepareStatement("INSERT INTO orders VALUES(?,?,?)");
