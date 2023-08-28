@@ -17,7 +17,85 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        String option = req.getParameter("option");
+
+
         try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+
+            switch (option) {
+                case "customer":
+                    String id1=req.getParameter("id");
+                    PreparedStatement pstm = connection.prepareStatement("select * from customer where id=?");
+
+                    pstm.setString(1,id1);
+
+                    ResultSet rst = pstm.executeQuery();
+                    resp.addHeader("Content-Type","application/json");
+                    resp.addHeader("Access-Control-Allow-Origin","*");
+
+
+                    JsonObjectBuilder customerBuilder = Json.createObjectBuilder();
+
+                    while (rst.next()) {
+
+                        String id = rst.getString(1);
+                        String name = rst.getString(2);
+                        String address = rst.getString(3);
+
+
+                        customerBuilder.add("id",id);
+                        customerBuilder.add("name",name);
+                        customerBuilder.add("address",address);
+
+                    }
+
+                    resp.getWriter().print(customerBuilder.build());
+
+                    break;
+                case "items":
+                    String code1=req.getParameter("code");
+                    PreparedStatement pstm1 = connection.prepareStatement("select * from item where code=?");
+
+                    pstm1.setString(1,code1);
+                    ResultSet rst1 = pstm1.executeQuery();
+
+                    resp.addHeader("Content-Type","application/json");
+                    resp.addHeader("Access-Control-Allow-Origin","*");
+
+//                    JsonArrayBuilder allItem = Json.createArrayBuilder();
+
+                    JsonObjectBuilder itemBuilder= Json.createObjectBuilder();
+                    while (rst1.next()) {
+
+                        String code = rst1.getString(1);
+                        String name = rst1.getString(2);
+                        int qtyOnHand = rst1.getInt(3);
+                        double unitPrice = rst1.getDouble(4);
+
+
+                        itemBuilder.add("code",code);
+                        itemBuilder.add("description",name);
+                        itemBuilder.add("qtyOnHand",qtyOnHand);
+                        itemBuilder.add("unitPrice",unitPrice);
+
+                    }
+
+                    resp.getWriter().print(itemBuilder.build());
+                    break;
+            }
+
+
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+       /* try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from orders");
@@ -55,7 +133,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 
     @Override

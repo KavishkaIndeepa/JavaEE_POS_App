@@ -244,18 +244,6 @@
         loadCusCode();
 
 
-        $("#selectItemCode").change(function() {
-            var selectedCode = $(this).val();
-            if (selectedCode) {
-                fetchItemDetails(selectedCode);
-            }
-        });
-        $("#selectCusID").change(function() {
-            var selectedId = $(this).val();
-            if (selectedId) {
-                fetchCusDetails(selectedId);
-            }
-        });
     });
 
     // loadItem
@@ -279,30 +267,30 @@
         });
     }
 
-    function fetchItemDetails(itemCode) {
-        $.ajax({
-            url: 'http://localhost:8080/jsp/pages/item',
-            data: { code: itemCode },
-            dataType: "json",
-            success: function(res) {
-                if (res.length > 0) {
-                    for (let i in res) {
-                        var item = res[i];
-                        $("#txtItemCode").val(item.code);
-                        $("#txtItemDescription").val(item.description);
-                        $("#txtItemPrice").val(item.unitPrice);
-                        $("#txtQTYOnHand").val(item.qtyOnHand);
-                    }
 
+    $("#selectItemCode").click(
+        function fetchItemDetails() {
+            let id = $("#selectItemCode").val();
+            $.ajax({
+                url: 'http://localhost:8080/jsp/pages/purchaseOrder?option=items&code='+ id,
+                // data: { code: itemCode },
+                success: function(res) {
+
+
+                    $("#txtItemCode").val(res.code);
+                    $("#txtItemDescription").val(res.description);
+                    $("#txtItemPrice").val(res.unitPrice);
+                    $("#txtQTYOnHand").val(res.qtyOnHand);
+
+
+                },
+                error: function(error) {
+                    console.error(error);
                 }
-            },
-            error: function(error) {
-                console.error(error);
-            }
-        });
-    }
-
-    // loadItem
+            });
+        }
+    );
+    // loadCus
     function loadCusCode() {
         $("#selectCusID").empty();
         let id = $("#selectCusID").val();
@@ -323,21 +311,21 @@
         });
     }
 
-    function fetchCusDetails(selectedId) {
-        $.ajax({
-            url: 'http://localhost:8080/jsp/pages/customer',
-            data:  { id: selectedId },
-            dataType: "json",
-            success: function(res) {
-                if (res.length > 0) {
-                    for (let i in res) {
-                        var cus = res[i];
-                        $("#orderCustomerID").val(cus.id);
-                        $("#orderCustomerName").val(cus.name);
-                        $("#orderCustomerAddress").val(cus.address);
-                    }
+    $("#selectCusID").click(
 
-                }
+    function fetchCusDetails() {
+        let id = $("#selectCusID").val();
+        $.ajax({
+            url: 'http://localhost:8080/jsp/pages/purchaseOrder?option=customer&id='+ id,
+            // data:  { id: selectedId },
+            // dataType: "json",
+            success: function(res) {
+
+                    // console.log(id)
+                        $("#orderCustomerID").val(res.id);
+                        $("#orderCustomerName").val(res.name);
+                        $("#orderCustomerAddress").val(res.address);
+
             },
             error: function(error) {
                 console.error(error);
@@ -345,7 +333,7 @@
         });
     }
 
-
+    );
     // date
     const currentDate = new Date();
 
