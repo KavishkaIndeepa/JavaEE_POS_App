@@ -171,21 +171,39 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
             }
 
+            for (JsonValue orderDetailValue : orderDetails) {
+                JsonObject orderDetailObject = orderDetailValue.asJsonObject();
+                String detailItemCode = orderDetailObject.getString("itemCode");
+                String detailQty = orderDetailObject.getString("qty");
+                String detailUnitPrice = orderDetailObject.getString("unitPrice");
 
-            PreparedStatement orderDetailStatement = connection.prepareStatement("INSERT INTO orderDetails VALUES(?,?,?,?)");
-            orderDetailStatement.setString(1, orderId);
-            orderDetailStatement.setString(2, itemCode);
-            orderDetailStatement.setString(3, qty);
-            orderDetailStatement.setString(4, unitPrice);
+                PreparedStatement pstm = connection.prepareStatement("INSERT INTO orderDetails VALUES(?,?,?,?)");
+                pstm.setString(1, orderId);
+                pstm.setString(2, detailItemCode);
+                pstm.setString(3, detailQty);
+                pstm.setString(4, detailUnitPrice);
 
-            affectedRows = orderDetailStatement.executeUpdate();
-            if (affectedRows == 0) {
-                connection.rollback();
-                throw new RuntimeException("Failed to save the order details");
-            } else {
-                System.out.println("Order Details Saved");
+                affectedRows = pstm.executeUpdate();
+                if (affectedRows == 0) {
+                    connection.rollback();
+                    throw new RuntimeException("Failed to save the order details");
+                } else {
+                    System.out.println("Order Details Saved for item: " + detailItemCode);
+
+                    PreparedStatement updateItemStatement = connection.prepareStatement(
+                            "UPDATE items SET quantity = quantity - ? WHERE code = ?");
+                    updateItemStatement.setInt(1, Integer.parseInt(detailQty));
+                    updateItemStatement.setString(2, detailItemCode);
+
+                    affectedRows = updateItemStatement.executeUpdate();
+                    if (affectedRows == 0) {
+                        connection.rollback();
+                        throw new RuntimeException("Failed to update item quantity");
+                    } else {
+                        System.out.println("Item quantity updated for item: " + detailItemCode);
+                    }
+                }
             }
-
 
             connection.commit();
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -205,6 +223,8 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             resp.getWriter().print(objectBuilder.build());
 
         }
+        
+        
     }
 
     @Override

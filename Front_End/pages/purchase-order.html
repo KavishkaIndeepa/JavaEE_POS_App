@@ -420,7 +420,7 @@
         let formData = $("#formData").serialize();
         $.ajax({
             url:"http://localhost:8080/jsp/pages/purchaseOrder",
-            method: "post",
+            method: "POST",
             data: formData,
             dataType:"json",
             success: function (res) {

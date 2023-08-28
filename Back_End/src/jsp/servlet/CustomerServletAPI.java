@@ -20,6 +20,10 @@ import java.sql.*;
 @WebServlet(urlPatterns = {"/pages/customer"})
 public class CustomerServletAPI extends HttpServlet {
 
+    public CustomerServletAPI(){
+        System.out.println("Customer Servlet");
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
