@@ -416,22 +416,6 @@
         $("#txtBalance").val(balanceAmount.toFixed(2));
     }
 
-    // $("#btnSubmitOrder").click(function () {
-    //     let formData = $("#formData").serialize();
-    //     $.ajax({
-    //         url:"http://localhost:8080/jsp/pages/purchaseOrder",
-    //         method: "POST",
-    //         data: formData,
-    //         dataType:"json",
-    //         success: function (res) {
-    //             alert(res.message);
-    //         },
-    //         error: function (error) {
-    //             alert(JSON.parse(error.responseText).message);
-    //         }
-    //     });
-    // });
-
     let disTOGave = 0;
 
     $('#txtDiscount').on('keyup', function() {
@@ -481,13 +465,13 @@
     });
 
     function getAllOdrderDetail() {
-        let rows = $("#orderTable").children.length;
+        let rows = $("#orderTable").children().length;
         let array = [];
         for (let i = 0; i < rows; i++) {
-            let code = $("#orderTable").children.eq(i).children(":eq(0)").text();
-            let byQty = $("#orderTable").children.eq(i).children(":eq(3)").text();
-            let qty = $("#orderTable").children.eq(i).children(":eq(4)").text();
-            let price = $("#orderTable").children.eq(i).children(":eq(2)").text();
+            let code = $("#orderTable tr:eq(" + i + ") td:eq(0)").text();
+            let byQty = $("#orderTable tr:eq(" + i + ") td:eq(3)").text();
+            let qty = $("#orderTable tr:eq(" + i + ") td:eq(4)").text();
+            let price = $("#orderTable tr:eq(" + i + ") td:eq(2)").text();
             array.push({code: code, byQty: byQty, qty: qty, price: price});
 
         }

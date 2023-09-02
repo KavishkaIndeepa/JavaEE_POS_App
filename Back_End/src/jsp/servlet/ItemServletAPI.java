@@ -16,7 +16,7 @@ public class ItemServletAPI extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/asestra", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from item");
             ResultSet rst = pstm.executeQuery();
 
@@ -63,7 +63,7 @@ public class ItemServletAPI extends HttpServlet {
 //
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/asestra", "root", "1234");
 
                     PreparedStatement pstm = connection.prepareStatement("insert into item values(?,?,?,?)");
                     pstm.setObject(1, code);
@@ -111,7 +111,7 @@ public class ItemServletAPI extends HttpServlet {
         resp.addHeader("Access-Control-Allow-Origin","*");
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/asestra", "root", "1234");
 
                     PreparedStatement pstm3 = connection.prepareStatement("update item set description=?,qtyOnHand=?,unitPrice=? where code=?");
                     pstm3.setObject(1, itemName);
@@ -151,7 +151,7 @@ public class ItemServletAPI extends HttpServlet {
 //
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/asestra", "root", "1234");
 
                     PreparedStatement pstm2 = connection.prepareStatement("delete from item where code=?");
                     pstm2.setObject(1, code);

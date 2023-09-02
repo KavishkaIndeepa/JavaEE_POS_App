@@ -23,7 +23,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/asestra", "root", "1234");
 
             switch (option) {
                 case "customer":
@@ -99,25 +99,28 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        JsonReader reader = Json.createReader(req.getReader());
-        JsonObject jsonObject = reader.readObject();
+
+        resp.addHeader("Access-Control-Allow-Origin","*");
+        resp.addHeader("Content-Type","application/json");
 
 
-
-
-        String orderId = jsonObject.getString("orderId");
-        String orderDate = jsonObject.getString("orderDate");
-        String customerId = jsonObject.getString("customerId");
 //        String itemCode = jsonObject.getString("itemCode");
 //        String qty = jsonObject.getString("qty");
 //        String unitPrice = jsonObject.getString("unitPrice");
 //        JsonArray orderDetails = jsonObject.getJsonArray("orderDetails");
-        resp.addHeader("Access-Control-Allow-Origin","*");
-        resp.addHeader("Content-Type","application/json");
+
         try {
             forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/asestra", "root", "1234");
             connection.setAutoCommit(false);
+
+            JsonReader reader = Json.createReader(req.getReader());
+            JsonObject jsonObject = reader.readObject();
+
+            String orderId = jsonObject.getString("oid");
+            String orderDate = jsonObject.getString("date");
+            String customerId = jsonObject.getString("odCusId");
+            System.out.println(orderId+orderDate+customerId);
 
             PreparedStatement orderStatement = connection.prepareStatement("INSERT INTO orders VALUES(?,?,?)");
             orderStatement.setString(1, orderId);
@@ -164,13 +167,29 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                 pstm3.setObject(2, itemCode);
                 int bvQty=Integer.parseInt(byQty);
                 int avQty=Integer.parseInt(qty);
-                pstm3.setObject(1,(avQty-bvQty));
+                pstm3.setInt(1,(avQty-bvQty));
                 if (!(pstm3.executeUpdate() > 0)) {
                     connection.rollback();
                     connection.setAutoCommit(true);
-                    throw new SQLException("Order Details Not added.!");
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    resp.getWriter().println(Json.createObjectBuilder()
+                            .add("Status", "Error")
+                            .add("message", "Order Details Not updated")
+                            .add("data", "")
+                            .build()
+                            .toString());
+                    return;
                 }
             }
+            connection.commit();
+            connection.setAutoCommit(true);
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.getWriter().println(Json.createObjectBuilder()
+                    .add("Status", "OK")
+                    .add("message", "Successfully Added")
+                    .add("data", "")
+                    .build()
+                    .toString());
 
         } catch (ClassNotFoundException | SQLException e) {
             JsonObjectBuilder error = Json.createObjectBuilder();
