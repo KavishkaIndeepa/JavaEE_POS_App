@@ -95,45 +95,6 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             throw new RuntimeException(e);
         }
 
-       /* try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-            PreparedStatement pstm = connection.prepareStatement("select * from orders");
-//            PreparedStatement pstm2 = connection.prepareStatement("select * from order_detail");
-            ResultSet rst = pstm.executeQuery();
-//            ResultSet rst2 = pstm2.executeQuery();
-            PrintWriter writer = resp.getWriter();
-            resp.addHeader("Access-Control-Allow-Origin","*");
-            resp.addHeader("Content-Type","application/json");
-
-            JsonArrayBuilder allCustomers = Json.createArrayBuilder();
-
-
-            while (rst.next()) {
-                String orderID = rst.getString(1);
-                String orderCusID = rst.getString(2);
-                String orderDate = rst.getString(3);
-//                String orderTotal = String.valueOf(rst.getInt(4));
-
-                JsonObjectBuilder customer = Json.createObjectBuilder();
-
-                customer.add("orderID",orderID);
-                customer.add("orderCusID",orderCusID);
-                customer.add("orderDate",orderDate);
-//                customer.add("contact",contact);
-
-                allCustomers.add(customer.build());
-            }
-
-
-            writer.print(allCustomers.build());
-
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }*/
     }
 
     @Override
@@ -141,17 +102,18 @@ public class PurchaseOrderServletAPI extends HttpServlet {
         JsonReader reader = Json.createReader(req.getReader());
         JsonObject jsonObject = reader.readObject();
 
-        resp.addHeader("Content-Type","application/json");
-        resp.addHeader("Access-Control-Allow-Origin","*");
+
+
 
         String orderId = jsonObject.getString("orderId");
         String orderDate = jsonObject.getString("orderDate");
         String customerId = jsonObject.getString("customerId");
-        String itemCode = jsonObject.getString("itemCode");
-        String qty = jsonObject.getString("qty");
-        String unitPrice = jsonObject.getString("unitPrice");
-        JsonArray orderDetails = jsonObject.getJsonArray("orderDetails");
-
+//        String itemCode = jsonObject.getString("itemCode");
+//        String qty = jsonObject.getString("qty");
+//        String unitPrice = jsonObject.getString("unitPrice");
+//        JsonArray orderDetails = jsonObject.getJsonArray("orderDetails");
+        resp.addHeader("Access-Control-Allow-Origin","*");
+        resp.addHeader("Content-Type","application/json");
         try {
             forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
@@ -162,65 +124,61 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             orderStatement.setString(2, orderDate);
             orderStatement.setString(3, customerId);
 
-            int affectedRows = orderStatement.executeUpdate();
-            if (affectedRows == 0) {
+//            int affectedRows = orderStatement.executeUpdate();
+//            if (affectedRows == 0) {
+//                connection.rollback();
+//                throw new RuntimeException("Failed to save the order");
+//            } else {
+//                System.out.println("Order Saved");
+//
+//            }
+            if (orderStatement.executeUpdate() > 0) {
                 connection.rollback();
-                throw new RuntimeException("Failed to save the order");
-            } else {
-                System.out.println("Order Saved");
+                connection.setAutoCommit(true);
+                throw new SQLException("Order Not Added");
 
             }
 
-            for (JsonValue orderDetailValue : orderDetails) {
-                JsonObject orderDetailObject = orderDetailValue.asJsonObject();
-                String detailItemCode = orderDetailObject.getString("itemCode");
-                String detailQty = orderDetailObject.getString("qty");
-                String detailUnitPrice = orderDetailObject.getString("unitPrice");
+            JsonArray odDetail = jsonObject.getJsonArray("odDetail");
+            for (JsonValue orderDetail: odDetail) {
+                JsonObject odObject = orderDetail.asJsonObject();
+                String itemCode = odObject.getString("code");
+                String qty = odObject.getString("qty");
+                String byQty = odObject.getString("byQty");
+                String unitPrice = odObject.getString("price");
 
-                PreparedStatement pstm = connection.prepareStatement("INSERT INTO orderDetails VALUES(?,?,?,?)");
-                pstm.setString(1, orderId);
-                pstm.setString(2, detailItemCode);
-                pstm.setString(3, detailQty);
-                pstm.setString(4, detailUnitPrice);
+                PreparedStatement pstm2 = connection.prepareStatement("insert into orderdetails values(?,?,?,?)");
+                pstm2.setObject(1, orderId);
+                pstm2.setObject(2, itemCode);
+                pstm2.setObject(3,byQty );
+                pstm2.setObject(4, unitPrice);
 
-                affectedRows = pstm.executeUpdate();
-                if (affectedRows == 0) {
+                if (!(pstm2.executeUpdate() > 0)) {
                     connection.rollback();
-                    throw new RuntimeException("Failed to save the order details");
-                } else {
-                    System.out.println("Order Details Saved for item: " + detailItemCode);
+                    connection.setAutoCommit(true);
+                    throw new SQLException("Order Details Not added.!");
+                }
 
-                    PreparedStatement updateItemStatement = connection.prepareStatement(
-                            "UPDATE items SET quantity = quantity - ? WHERE code = ?");
-                    updateItemStatement.setInt(1, Integer.parseInt(detailQty));
-                    updateItemStatement.setString(2, detailItemCode);
 
-                    affectedRows = updateItemStatement.executeUpdate();
-                    if (affectedRows == 0) {
-                        connection.rollback();
-                        throw new RuntimeException("Failed to update item quantity");
-                    } else {
-                        System.out.println("Item quantity updated for item: " + detailItemCode);
-                    }
+                PreparedStatement pstm3 = connection.prepareStatement("update item set qty=? where code=?");
+                pstm3.setObject(2, itemCode);
+                int bvQty=Integer.parseInt(byQty);
+                int avQty=Integer.parseInt(qty);
+                pstm3.setObject(1,(avQty-bvQty));
+                if (!(pstm3.executeUpdate() > 0)) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                    throw new SQLException("Order Details Not added.!");
                 }
             }
 
-            connection.commit();
-            resp.setStatus(HttpServletResponse.SC_OK);
-            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("message", "Successfully Purchased Order.");
-            objectBuilder.add("status", resp.getStatus());
-            resp.getWriter().print(objectBuilder.build());
-
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("message", "Failed to save the order.");
-            objectBuilder.add("status", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().print(objectBuilder.build());
+        } catch (ClassNotFoundException | SQLException e) {
+            JsonObjectBuilder error = Json.createObjectBuilder();
+            error.add("Status","Error");
+            error.add("message",e.getLocalizedMessage());
+            error.add("data","");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().print(error.build());
 
         }
         
