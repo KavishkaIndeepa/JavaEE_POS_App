@@ -367,6 +367,7 @@
             quantity: quantity,
             total: total
         });
+        // orderItems.push(itemCode,itemName,price,quantity,total);
 
         $("#orderCustomerID").val("");
         $("#orderCustomerName").val("");
@@ -377,12 +378,25 @@
         $("#txtQTYOnHand").val("");
         $("#txtQty").val("");
 
+        // let row=`<tr>
+        //          <td>${itemCode}</td>
+        //           <td>${itemName}</td>
+        //         <td>${price}</td>
+        //         <td>${quantity}</td>
+        //         <td>${total}</td>
+        //            </tr>`;
+        // $("#orderTable").append(row);
+        //
+        //
+        //
+        // orderDeatils.push(orderItems);
+
         updateOrderTable();
 
         updateTotals();
     });
 
-
+    let orderDeatils;
     function updateOrderTable() {
         let tableBody = $("#orderTable");
         tableBody.empty();
@@ -439,14 +453,15 @@
         let oid = $("#txtOrderID").val();
         let date=   $("#txtDate").val();
         let odCusId=  $("#orderCustomerID").val();
-       // let odDetail=getAllOdrderDetail();
-        let odDetail=orderItems;
+        //let odDetail=getAllOdrderDetail();
+        let odDetail=orderDeatils;
+       /* let odDetail=orderItems;*/
 
         let ob={
-            oid:oid,
-            date:date,
-            odCusId:odCusId,
-            odDetail:orderItems
+            "oid":oid,
+            "date":date,
+            "odCusId":odCusId,
+            "odDetail":odDetail
         }
 
         $.ajax({

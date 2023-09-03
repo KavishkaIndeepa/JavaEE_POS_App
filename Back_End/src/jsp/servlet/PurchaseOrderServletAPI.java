@@ -142,7 +142,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
             }
 
-            JsonArray odDetail = jsonObject.getJsonArray("odDetail");
+            JsonArray odDetail = jsonObject.getJsonArray("orderDeatils");
             for (JsonValue orderDetail: odDetail) {
                 JsonObject odObject = orderDetail.asJsonObject();
                 String itemCode = odObject.getString("code");
