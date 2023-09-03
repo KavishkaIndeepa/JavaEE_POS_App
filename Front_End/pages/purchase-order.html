@@ -351,6 +351,7 @@
 
     let orderItems= [];
 
+
     $("#btnAddToTable").click(function() {
         let itemCode = $("#txtItemCode").val();
         let itemName = $("#txtItemDescription").val();
@@ -438,13 +439,14 @@
         let oid = $("#txtOrderID").val();
         let date=   $("#txtDate").val();
         let odCusId=  $("#orderCustomerID").val();
-        let odDetail=getAllOdrderDetail();
+       // let odDetail=getAllOdrderDetail();
+        let odDetail=orderItems;
 
         let ob={
             oid:oid,
             date:date,
             odCusId:odCusId,
-            odDetail:odDetail
+            odDetail:orderItems
         }
 
         $.ajax({

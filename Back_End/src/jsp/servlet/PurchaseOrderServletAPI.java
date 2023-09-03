@@ -156,6 +156,8 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                 pstm2.setObject(3,byQty );
                 pstm2.setObject(4, unitPrice);
 
+                System.out.println(itemCode+qty);
+
                 if (!(pstm2.executeUpdate() > 0)) {
                     connection.rollback();
                     connection.setAutoCommit(true);
